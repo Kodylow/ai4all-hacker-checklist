@@ -1,0 +1,169 @@
+<!doctype html>
+<html>
+<head>
+    <title>Hacker Checklist</title>
+    <script src="https://replit.com/public/js/repl-auth-v2.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: url("/static/bolts-bg.jpg") no-repeat center center fixed;
+            background-size: cover;
+        }
+        h1 {
+            text-align: center;
+        }
+        #loginButton {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 15px 30px;
+            background-color: #021379;
+            color: white;
+            border-radius: 5px;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+        }
+        #loginButton:hover {
+            background-color: #002984;
+        }
+    </style>
+</head>
+<body class="text-black">
+    <div class="absolute w-full inset-x-0 top-0 z-0">
+        <!-- <img src="{{ url_for('static', filename='bolts-bg.jpg') }}" alt="" class="w-full"> -->
+        <div class="bg-gradient-to-b from-transparent via-transparent bg-opacity-40 absolute inset-0"></div>
+    </div>
+    <main class="grid grid-cols-1 justify-items-center p-8 md:p-32 z-10 relative">
+        <div class="flex flex-row justify-center gap-12 text-center items-center">
+            <!-- <img src="{{ user_profile_image }}" alt="{{ user_name }}" class="w-24 h-24 rounded-full"></img>
+            <h1 class="text-h1 text">X</h1> -->
+            <img src="{{ url_for('static', filename='ai4all.jpg') }}" alt="AI4ALL Logo" class="w-48 rounded"></img>
+        </div>
+        <h1 class="text-3xl md:text-5xl text-[#010754] font-bold mt-8">
+            {{ user_name }}'s AI4ALL Hacker Checklist
+        </h1>
+        <div class="flex flex-wrap justify-center gap-6 mt-8">
+            <a href="https://discord.gg/AVgabQzCqJ" target="_blank" class="text-white bg-[#021379] px-8 py-2 rounded hover:bg-blue-700">
+                1. Join the Discord 👋
+            </a>
+            <a href="https://bolt.fun/tournaments/ai4all/overview" target="_blank" class="text-white bg-[#021379] px-8 py-2 rounded hover:bg-blue-700">
+                2. Register for the Hackathon 🚀
+            </a>
+            <a href="#perks" class="text-white bg-[#021379] px-8 py-2 rounded hover:bg-blue-700">
+                3. Claim your Hacker Perks 🎁
+            </a>
+            <a id="tweetButton" href="#" class="text-center text-white bg-orange-500 px-8 py-2 rounded hover:bg-red-700">
+                4. Let @Replit know you want to swap Cycles <-> Bitcoin!! 🐦
+            </a>
+        </div>
+    </main>
+<script>
+
+  function decodeAuthHeader(auth_header) {
+  const macaroon = auth_header.split("macaroon=")[1].split(" ")[0];
+  const invoice = auth_header.split("invoice=")[1];
+  return { macaroon, invoice };
+}
+
+document.addEventListener("DOMContentLoaded", (event) => {
+  const tweetButton = document.getElementById("tweetButton");
+
+  if (tweetButton) {
+    tweetButton.addEventListener("click", async function (e) {
+      e.preventDefault();
+
+      // change the button text to "Loading..." and disable it
+      tweetButton.textContent = "Loading...";
+      tweetButton.disabled = true;
+
+      let response;
+      let params = {};
+
+      // if window.webln exists, then add an extra param "weblnEnabled=true"
+      if (typeof window.webln !== "undefined") {
+        params = { weblnEnabled: true };
+      } else {
+        // otherwise, add an extra param "weblnEnabled=false"
+        params = { weblnEnabled: false };
+      }
+
+      try {
+        response = await fetch("/gpt-tweet", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(params),
+        });
+
+        // handle 402 payment required
+        if (response.status === 402) {
+          const auth_header = response.headers.get("www-authenticate");
+          console.log("auth_header", auth_header);
+          let { macaroon, invoice } = decodeAuthHeader(
+            auth_header ? auth_header : ""
+          );
+          invoice = invoice.replace(/"/g, "");
+
+          if (typeof window.webln !== "undefined") {
+            await window.webln.enable();
+            const { preimage } = await window.webln.sendPayment(invoice);
+
+            if (!!preimage) {
+              console.log("preimage", preimage)
+              console.log("macaroon", macaroon)
+              macaroon = macaroon + preimage;
+              let auth_header = `L402 macaroon=${macaroon}`;
+              response = await fetch("/gpt-tweet", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "authorization": auth_header,
+                },
+                body: JSON.stringify(params),
+              });
+            } else {
+              console.error("Error sending payment");
+            }
+            // if (error.message.includes("User rejected")) {
+            //   // If user rejected the payment, handle it here.
+            //   console.log("Payment rejected by the user");
+            //   // You could also use a modal or an alert to inform the user
+            //   alert("Payment rejected. Please try again.");
+            // } else {
+            //   // If it's some other error, handle it here.
+            //   throw new Error(`HTTP error! status: ${response.status}`);
+            // }
+          }
+        }
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        let tweet_text = data.tweet_text;
+        let twitter_url = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(tweet_text);
+        console.log(twitter_url);
+        window.open(twitter_url, "_blank");
+    
+        // change the button text to "Tweet Loaded, Join the Cycles<->Sats Movement!" 
+        tweetButton.textContent = "Tweet Loaded, Join the Cycles<->Sats Movement!";
+      } catch (error) {
+        console.error("Error:", error);
+      } finally {
+        // After the fetch operation is complete or an error occurs, reset the button
+        tweetButton.textContent =
+          "4. Let @Replit know you want to swap Cycles <-> Bitcoin!! 🐦";
+        tweetButton.disabled = false;
+      }
+    }); // Here's where you close the event listener
+  } // And here's where you close the if (tweetButton) statement
+}); // Finally, this is where you close the DOMContentLoaded event
+
+  
+</script>
+</body>
+</html>

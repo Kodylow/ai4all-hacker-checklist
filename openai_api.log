@@ -1,0 +1,12 @@
+2023-07-04 05:29:46,692 INFO werkzeug [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8080
+ * Running on http://172.31.196.22:8080
+2023-07-04 05:29:46,692 INFO werkzeug [33mPress CTRL+C to quit[0m
+2023-07-04 05:29:48,154 INFO werkzeug 172.31.196.1 - - [04/Jul/2023 05:29:48] "[33mOPTIONS * HTTP/1.1[0m" 404 -
+2023-07-04 05:29:48,294 INFO werkzeug 172.31.196.1 - - [04/Jul/2023 05:29:48] "GET / HTTP/1.1" 200 -
+2023-07-04 05:29:48,533 INFO werkzeug 172.31.196.1 - - [04/Jul/2023 05:29:48] "[36mGET /static/bolts-bg.jpg HTTP/1.1[0m" 304 -
+2023-07-04 05:29:48,535 INFO werkzeug 172.31.196.1 - - [04/Jul/2023 05:29:48] "[36mGET /static/ai4all.jpg HTTP/1.1[0m" 304 -
+2023-07-04 05:29:49,876 INFO openai_api Sending request to OpenAI API...
+2023-07-04 05:29:50,629 ERROR openai_api OpenAI API request failed with status 400. Message: {'error': {'message': "Invalid value for 'content': expected a string, got null.", 'type': 'invalid_request_error', 'param': 'messages.[1].content', 'code': None}}
+2023-07-04 05:29:50,630 INFO werkzeug 172.31.196.1 - - [04/Jul/2023 05:29:50] "POST /gpt-tweet HTTP/1.1" 200 -
