@@ -147,7 +147,9 @@ document.addEventListener("DOMContentLoaded", (event) => {
         let tweet_text = data.tweet_text;
         let twitter_url = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(tweet_text);
         console.log(twitter_url);
-        window.open(twitter_url, "_blank");
+        setTimeOut(() => {
+          window.open(twitter_url, "_blank");
+        }, 3000)
     
         // change the button text to "Tweet Loaded, Join the Cycles<->Sats Movement!" 
         tweetButton.textContent = "Tweet Loaded, Join the Cycles<->Sats Movement!";
